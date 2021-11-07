@@ -299,32 +299,48 @@ class MintBackup:
             self.builder.get_object("grid2").show()
         else:
             self.builder.get_object("grid2").hide()
+    
 
     def conneect_callback(self, widget):
-        id = self.builder.get_object("id1").get_text()
-        password = self.builder.get_object("password1").get_text()
-        os.system("echo \"{}\n \n{}\" > {}/.cred".format(id,password,self.home_directory))
-        check = os.system("gio mount davs://drive.hamonikr.org/remote.php/webdav < {}/.cred".format(self.home_directory))
-        if check == 0:
-            BEFORE_DIR = os.popen("echo /run/user/*").read().strip()
-            BACKUP_DIR = BEFORE_DIR + "/gvfs/dav:host=drive.hamonikr.org,ssl=true,prefix=%2Fremote.php%2Fwebdav"
-            self.builder.get_object("filechooserbutton_backup_dest").set_current_folder(BACKUP_DIR)
-        else:
-            self.show_message(_("Check your Id and Password"))
-            return
+        self.builder.get_object("loading_spinner").start()
+
+        def thred_run():
+            id = self.builder.get_object("id1").get_text()
+            password = self.builder.get_object("password1").get_text()
+            os.system("echo \"{}\n \n{}\" > {}/.cred".format(id,password,self.home_directory))
+            check = os.system("gio mount davs://drive.hamonikr.org/remote.php/webdav < {}/.cred".format(self.home_directory))
+            print(check)
+            if check == 0:
+                BEFORE_DIR = os.popen("echo /run/user/*").read().strip()
+                BACKUP_DIR = BEFORE_DIR + "/gvfs/dav:host=drive.hamonikr.org,ssl=true,prefix=%2Fremote.php%2Fwebdav"
+                self.builder.get_object("filechooserbutton_backup_dest").set_current_folder(BACKUP_DIR)
+            else:
+                GLib.idle_add(lambda: self.show_message(_("Check your Id and Password")))
+            self.builder.get_object("loading_spinner").stop()
+        
+        thread = threading.Thread(target=thred_run)
+        thread.daemon = True
+        thread.start()
     
     def conneect_callback1(self, widget):
-        id = self.builder.get_object("id2").get_text()
-        password = self.builder.get_object("password2").get_text()
-        os.system("echo \"{}\n \n{}\" > {}/.cred".format(id,password,self.home_directory))
-        check = os.system("gio mount davs://drive.hamonikr.org/remote.php/webdav < {}/.cred".format(self.home_directory))
-        if check == 0:
-            BEFORE_DIR = os.popen("echo /run/user/*").read().strip()
-            BACKUP_DIR = BEFORE_DIR + "/gvfs/dav:host=drive.hamonikr.org,ssl=true,prefix=%2Fremote.php%2Fwebdav"
-            self.builder.get_object("filechooserbutton_restore_source").set_current_folder(BACKUP_DIR)
-        else:
-            self.show_message(_("Check your Id and Password"))
-            return
+        self.builder.get_object("loading_spinner").start()
+
+        def thred_run1():
+            id = self.builder.get_object("id2").get_text()
+            password = self.builder.get_object("password2").get_text()
+            os.system("echo \"{}\n \n{}\" > {}/.cred".format(id,password,self.home_directory))
+            check = os.system("gio mount davs://drive.hamonikr.org/remote.php/webdav < {}/.cred".format(self.home_directory))
+            if check == 0:
+                BEFORE_DIR = os.popen("echo /run/user/*").read().strip()
+                BACKUP_DIR = BEFORE_DIR + "/gvfs/dav:host=drive.hamonikr.org,ssl=true,prefix=%2Fremote.php%2Fwebdav"
+                self.builder.get_object("filechooserbutton_backup_dest").set_current_folder(BACKUP_DIR)
+            else:
+                GLib.idle_add(lambda: self.show_message(_("Check your Id and Password")))
+            self.builder.get_object("loading_spinner").stop()
+        
+        thread = threading.Thread(target=thred_run1)
+        thread.daemon = True
+        thread.start()
 
     def forward_callback(self, widget):
         # Go forward
