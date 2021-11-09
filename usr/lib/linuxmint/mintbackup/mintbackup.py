@@ -333,7 +333,7 @@ class MintBackup:
             if check == 0:
                 BEFORE_DIR = os.popen("echo /run/user/*").read().strip()
                 BACKUP_DIR = BEFORE_DIR + "/gvfs/dav:host=drive.hamonikr.org,ssl=true,prefix=%2Fremote.php%2Fwebdav"
-                self.builder.get_object("filechooserbutton_backup_dest").set_current_folder(BACKUP_DIR)
+                self.builder.get_object("filechooserbutton_restore_source").set_current_folder(BACKUP_DIR)
             else:
                 GLib.idle_add(lambda: self.show_message(_("Check your Id and Password")))
             self.builder.get_object("loading_spinner").stop()
